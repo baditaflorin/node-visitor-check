@@ -8,13 +8,35 @@ app.use(cookieParser());
 
 app.get('/', (req, res) => {
     if (req.cookies.hasVisited) {
-        res.send('Already Visited');
+        res.send(buildResponse('Already Visited', true));
     } else {
-        // Set the cookie to expire after 365 days (can be adjusted as per requirements)
         res.cookie('hasVisited', 'true', { maxAge: 365 * 24 * 60 * 60 * 1000 });
-        res.send('New Visitor');
+        res.send(buildResponse('New Visitor', false));
     }
 });
+
+function buildResponse(message, hasVisited) {
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Visit Checker</title>
+        </head>
+        <body>
+            <p>${message}</p>
+            <script>
+                if(localStorage.getItem('hasVisited')) {
+                    document.querySelector('p').textContent = 'Already Visited';
+                } else {
+                    if (!${hasVisited}) {
+                        localStorage.setItem('hasVisited', 'true');
+                    }
+                }
+            </script>
+        </body>
+        </html>
+    `;
+}
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
